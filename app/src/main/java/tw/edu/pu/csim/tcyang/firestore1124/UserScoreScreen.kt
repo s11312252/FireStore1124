@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -43,20 +42,34 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
         Text("您的分數是：$score")
         Spacer(modifier = Modifier.size(10.dp))
 
+        // **修改：將單筆新增替換為批量新增組員資料**
+        Button(onClick = {
+            // **請將以下資料替換成您組員的真實姓名及學號後兩碼分數**
+            val teamScores = listOf(
+                UserScoreModel(user = "鄭姿佳", score = 95),
+                UserScoreModel(user = "林彣媞", score = 90),
+                UserScoreModel(user = "陳芯霈", score = 96), // <-- 請修改成您的姓名和分數
+                UserScoreModel(user = "黃婉玲", score = 95)
+            )
+            userScoreViewModel.addUsers(teamScores) // 呼叫新增的批量函式
+        }) {
+            Text("新增組員資料 (批量)")
+        }
 
+        // 保留原有的函式呼叫，但將按鈕文字修改，避免與新功能混淆
         Button(onClick = {
             // 在按鈕點擊時，直接呼叫 ViewModel 的函式
             var userScore = UserScoreModel("陳芯霈", 39)
             userScoreViewModel.addUser(userScore)
         }) {
-            Text("新增資料")
+            Text("新增單筆資料 (原功能)")
         }
         Button(onClick = {
             // 在按鈕點擊時，直接呼叫 ViewModel 的函式
             var userScore = UserScoreModel("陳芯霈", 21)
             userScoreViewModel.updateUser(userScore)
         }) {
-            Text("新增/異動資料")
+            Text("新增/異動資料 (原功能)")
         }
 
         Button(onClick = {
@@ -64,7 +77,7 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
             var userScore = UserScoreModel("陳芯霈", 21)
             userScoreViewModel.deleteUser(userScore)
         }) {
-            Text("刪除資料")
+            Text("刪除資料 (原功能)")
         }
 
         Button(onClick = {
@@ -72,8 +85,10 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
             var userScore = UserScoreModel("陳芯霈", 21)
             userScoreViewModel.getUser(userScore)
         }) {
-            Text("查詢資料")
+            Text("查詢資料 (原功能)")
         }
+
+        // 保持此按鈕名稱不變，但背後邏輯已修改以格式化輸出
         Button(onClick = {
             // 在按鈕點擊時，直接呼叫 ViewModel 的函式
             userScoreViewModel.orderUser()
@@ -82,7 +97,5 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
         }
         Text(userScoreViewModel.message)
 
-        }
     }
-
-
+}

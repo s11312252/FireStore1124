@@ -15,6 +15,14 @@ class UserScoreViewModel : ViewModel() {
     var message by mutableStateOf("訊息")
         private set
 
+    // **新增：支援批量新增組員資料**
+    fun addUsers(userScores: List<UserScoreModel>) {
+        viewModelScope.launch {
+            message = userScoreRepository.addUser(userScores)
+        }
+    }
+
+    // **保留您原有的函式**
     fun addUser(userScore: UserScoreModel) {
         // 在 viewModelScope 中啟動一個協程
         viewModelScope.launch {
@@ -50,9 +58,7 @@ class UserScoreViewModel : ViewModel() {
         // 在 viewModelScope 中啟動一個協程
         viewModelScope.launch {
             // 呼叫 suspend function，並等待結果
-            message = userScoreRepository.orderByScore()
+            message = userScoreRepository.orderByScore() // 這裡的 orderByScore 已修改為格式化輸出
         }
     }
-    }
-
-
+}

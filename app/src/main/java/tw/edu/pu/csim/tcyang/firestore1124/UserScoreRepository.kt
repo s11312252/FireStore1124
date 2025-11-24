@@ -5,17 +5,19 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
+import android.text.format.DateFormat // **新增匯入：用於日期時間格式化**
 
 class UserScoreRepository {
     val db = Firebase.firestore
 
     suspend fun addUser(userScore: UserScoreModel): String {
         return try {
-            val documentReference =
-                db.collection("UserScore")
-                    .add(userScore)
-                    .await()
-            "新增資料成功！Document ID:\n ${documentReference.id}"
+            // 為了讓後續的 updateUser/deleteUser 函式能正常工作，建議使用 set() 並以 user 姓名作為文件ID
+            db.collection("UserScore")
+                .document(userScore.user)
+                .set(userScore)
+                .await()
+            "新增資料成功！Document ID:\n ${userScore.user}"
         } catch (e: Exception) {
             // await() 失敗時會拋出例外，在這裡捕捉並處理
             "新增資料失敗：${e.message}"
@@ -60,7 +62,7 @@ class UserScoreRepository {
 
     suspend fun getUserScoreByName(userScore: UserScoreModel): String {
         return try {
-            var userCondition = "陳芯霈"
+            var userCondition = userScore.user // 建議使用傳入的 userScore.user
             val querySnapshot = db.collection("UserScore")
                 .whereEqualTo("user", userCondition) // 篩選條件
                 .get().await()
@@ -76,37 +78,44 @@ class UserScoreRepository {
             "查詢資料失敗：${e.message}"
         }
 
-        }
+    }
+
+    // **修改：查詢前三名並格式化輸出 (包含名次、姓名、分數、日期時間)**
     suspend fun orderByScore(): String {
         return try {
-            var message = ""
             val querySnapshot = db.collection("UserScore")
-                .orderBy("score", Query.Direction.DESCENDING)
-                .limit(3).get().await()
+                .orderBy("score", Query.Direction.DESCENDING) // 分數遞減排序
+                .limit(3).get().await() // 限制前三名
 
-            // 使用 forEach 迴圈遍歷所有文件
-            querySnapshot.documents.forEach { document ->
+            var resultList = mutableListOf<String>()
+
+            // 使用 forEachIndexed 迴圈遍歷，以便取得名次
+            querySnapshot.documents.forEachIndexed { index, document ->
                 // 將文件轉換為 UserScoreModel
                 val userScore = document.toObject<UserScoreModel>()
 
-                // 檢查是否成功轉換，並將分數加入字串
                 userScore?.let {
-                    message += "使用者 ${it.user} 的分數為 ${it.score} \n"
+                    // 格式化日期時間
+                    val formattedTime = it.timestamp?.let { date ->
+                        DateFormat.format("yyyy/MM/dd HH:mm:ss", date).toString()
+                    } ?: "無時間戳"
+
+                    val rank = index + 1 // 名次
+                    // 格式化輸出：名次. 姓名, 分數, 存入日期時間
+                    val line = "$rank. 姓名: ${it.user}, 分數: ${it.score}, 存入時間: $formattedTime"
+                    resultList.add(line)
                 }
             }
-            if (message.isEmpty()){
-                message = "抱歉，資料庫目前無相關資料"
+
+            return if (resultList.isNotEmpty()){
+                "🏆 查詢前三名 (分數遞減排序)：\n" + resultList.joinToString("\n")
+            } else {
+                "抱歉，資料庫目前無相關資料"
             }
-            else{
-                message = "查詢成功！分數由大到小排序為：\n" + message
-            }
-            message
 
         } catch (e: Exception) {
             // await() 失敗時會拋出例外，在這裡捕捉並處理
-            "查詢資料失敗：${e.message}"
+            "❌ 查詢資料失敗：${e.message}"
         }
     }
-
-
 }
