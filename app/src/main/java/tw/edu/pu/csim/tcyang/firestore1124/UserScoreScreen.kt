@@ -27,3 +27,4 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
         Text(userScoreViewModel.message)
     }
 }
+
