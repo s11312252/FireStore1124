@@ -19,12 +19,29 @@ fun UserScoreScreen( userScoreViewModel: UserScoreViewModel = viewModel()
     ) {
         Button(onClick = {
             // 在按鈕點擊時，直接呼叫 ViewModel 的函式
-            var userScore = UserScoreModel("陳芯霈", 100)
+            var userScore = UserScoreModel("陳芯霈", 39)
             userScoreViewModel.addUser(userScore)
         }) {
             Text("新增資料")
         }
+        Button(onClick = {
+            // 在按鈕點擊時，直接呼叫 ViewModel 的函式
+            var userScore = UserScoreModel("陳芯霈", 21)
+            userScoreViewModel.updateUser(userScore)
+        }) {
+            Text("新增/異動資料")
+        }
+
+        Button(onClick = {
+            // 在按鈕點擊時，直接呼叫 ViewModel 的函式
+            var userScore = UserScoreModel("陳芯霈", 21)
+            userScoreViewModel.deleteUser(userScore)
+        }) {
+            Text("刪除資料")
+        }
         Text(userScoreViewModel.message)
+
+        }
     }
-}
+
 
